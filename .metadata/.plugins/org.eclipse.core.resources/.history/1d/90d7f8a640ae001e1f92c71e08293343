@@ -1,0 +1,186 @@
+package com.prueba.test.dao;
+
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.prueba.test.models.Employee_Worked_Hours;
+import com.prueba.test.models.Employees;
+import com.prueba.test.models.Genders;
+import com.prueba.test.models.Jobs;
+import com.prueba.test.repository.EmployeesRepository;
+import com.prueba.test.repository.GendersRepository;
+import com.prueba.test.repository.JobsRepository;
+import com.prueba.test.repository.EmployeeWorkedHoursRepository;
+import com.prueba.test.request.RequestConsultaTotalHoras;
+import com.prueba.test.request.RequestEmployeeByJob;
+import com.prueba.test.request.RequestPagoEmpleado;
+import com.prueba.test.response.ResponseConsultaTotalHoras;
+import com.prueba.test.response.ResponseEmployee;
+import com.prueba.test.response.ResponseEmployeeByJob;
+import com.prueba.test.response.ResponseEmployeeWorkedHours;
+import com.prueba.test.response.ResponsePagoEmpleado;
+import com.prueba.test.service.TestService;
+
+@Service
+public class Dao {
+	
+	@Autowired
+	private EmployeeWorkedHoursRepository EmployeeWorkedHoursRepository;
+	
+	@Autowired
+	private EmployeesRepository employeesRepository;
+	
+	@Autowired
+	private GendersRepository gendersRepository;
+	
+	@Autowired
+	private JobsRepository jobsRepository;
+	
+	@Autowired 
+	private TestService testService;
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(Dao.class);
+	
+	public ResponseEmployee agregarEmpleado(Employees employee) throws Exception{
+		
+		ResponseEmployee response=new ResponseEmployee();
+		
+		try {
+			List <Employees> employees = employeesRepository.findByNameAndLastName(employee.getName(), employee.getLast_name());
+			List<Genders> gender = gendersRepository.findByGender(employee.getGender_id());
+			List<Jobs> job = jobsRepository.findByJob(employee.getJob_id()); 
+			
+			 Date fecha=new Date();
+			 DateFormat formatter = new SimpleDateFormat("yyyyMMdd");                           
+			    int d1 = Integer.parseInt(formatter.format(employee.getBirthdate()));                            
+			    int d2 = Integer.parseInt(formatter.format(fecha));                          
+			    int edad= (d2 - d1) / 10000;    
+			    LOGGER.info("edad :: " + edad);
+			    
+			if(employees.isEmpty() && !gender.isEmpty() && !gender.equals(null)
+				&& !job.isEmpty() && !job.equals(null) && edad >=18) {
+				response.setId("10");
+				response.setSuccess("true");	
+				testService.save(employee);
+			} else {
+				response.setId("null");
+				response.setSuccess("false");
+			}
+		}catch(Exception e){
+			response.setId("null");
+			response.setSuccess("false");
+		}
+		
+		return response;
+	}
+	
+public ResponseEmployeeWorkedHours agregarHorasTrabajadas(Employee_Worked_Hours employee) throws Exception{
+		
+	ResponseEmployeeWorkedHours response=new ResponseEmployeeWorkedHours();
+		
+		try {
+			List <Employees> employees = employeesRepository.findById(employee.getEmployee_id());
+			
+			Date date=new Date();
+			Timestamp fecha=new Timestamp(date.getTime());
+			
+			SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Timestamp dateFormat = Timestamp.valueOf(formatter.format(employee.getWorked_date()));
+			
+			
+			if(!employees.isEmpty() && !employees.equals(null) && employee.getWorked_hours()<=20 && dateFormat.getTime()<fecha.getTime()) {
+				response.setId("100");
+				response.setSuccess("true");	
+				testService.save(employee);
+			} else {
+				response.setId("null");
+				response.setSuccess("false");
+			}
+		}catch(Exception e){
+			response.setId("null");
+			response.setSuccess("false");
+		}
+		
+		return response;
+	}
+
+public ResponseEmployeeByJob obtenerEmpleadoPorPuesto(RequestEmployeeByJob employeeByJob) throws Exception{
+	
+	ResponseEmployeeByJob response=new ResponseEmployeeByJob();
+		
+		try {
+			List <Employees> employeeByJobId = employeesRepository.findByJobId(employeeByJob.getJob_id());
+			List <Jobs> finJob = jobsRepository.findByJob(employeeByJob.getJob_id());
+		
+			
+			if(!finJob.isEmpty() && !finJob.equals(null)) {
+				response.setEmployees(employeeByJobId);
+				response.setSuccess("true");	
+			} else {
+				response.setEmployees(null);
+				response.setSuccess("false");
+			}
+		}catch(Exception e){
+			response.setEmployees(null);
+			response.setSuccess("false");
+		}
+		
+		return response;
+	}
+
+public ResponseConsultaTotalHoras consultarTotalHorasTrabajadas(RequestConsultaTotalHoras requestConsultaTotalHoras) throws Exception{
+	
+	ResponseConsultaTotalHoras response=new ResponseConsultaTotalHoras();
+		
+		try {
+			List <Employees> employees = employeesRepository.findById(requestConsultaTotalHoras.getEmployee_id());					
+			if(!employees.isEmpty() && !employees.equals(null) && requestConsultaTotalHoras.getStart_date().getTime()<requestConsultaTotalHoras.getEnd_date().getTime()) {
+				int totalHours = EmployeeWorkedHoursRepository.ObtenerTotalHoras(requestConsultaTotalHoras.getStart_date(), requestConsultaTotalHoras.getEnd_date());
+				response.setTotal_worked_hours(String.valueOf(totalHours));
+				response.setSuccess("true");	
+			} else {
+				response.setTotal_worked_hours("null");
+				response.setSuccess("false");
+			}
+		}catch(Exception e){
+			response.setTotal_worked_hours("null");
+			response.setSuccess("false");
+		}
+		
+		return response;
+	}
+
+public ResponsePagoEmpleado consultarPagoEmpleado(RequestPagoEmpleado request) throws Exception{
+	
+	ResponsePagoEmpleado response=new ResponsePagoEmpleado();
+		
+		try {
+			List <Employees> employee_id = employeesRepository.findById(request.getEmployee_id());					
+
+			if(!employee_id.isEmpty() && !employee_id.equals(null) && request.getStart_date().getTime()<request.getEnd_date().getTime()
+					&& !employee_worked_hours.isEmpty() && !employee_worked_hours.equals(null)) {
+				
+				int 
+				
+				response.setPayment(String.valueOf(totalHours));
+				response.setSuccess("true");	
+			} else {
+				response.setPayment("null");
+				response.setSuccess("false");
+			}
+		}catch(Exception e){
+			response.setPayment("null");
+			response.setSuccess("false");
+		}
+		
+		return response;
+	}
+}

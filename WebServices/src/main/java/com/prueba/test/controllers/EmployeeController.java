@@ -16,10 +16,12 @@ import com.prueba.test.models.Employee_Worked_Hours;
 import com.prueba.test.models.Employees;
 import com.prueba.test.request.RequestConsultaTotalHoras;
 import com.prueba.test.request.RequestEmployeeByJob;
+import com.prueba.test.request.RequestPagoEmpleado;
 import com.prueba.test.response.ResponseConsultaTotalHoras;
 import com.prueba.test.response.ResponseEmployee;
 import com.prueba.test.response.ResponseEmployeeByJob;
 import com.prueba.test.response.ResponseEmployeeWorkedHours;
+import com.prueba.test.response.ResponsePagoEmpleado;
 import com.prueba.test.service.TestService;
 
 @RestController
@@ -76,6 +78,17 @@ public class EmployeeController {
 		
 		try {
 			ResponseConsultaTotalHoras response = service.consultarTotalHorasTrabajadas(requestConsultaTotalHoras);
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	@PostMapping("/consultarPagoEmpleado")
+	public ResponseEntity<?> consultarPagoEmpleado(@RequestBody RequestPagoEmpleado request) throws Exception{
+		
+		try {
+			ResponsePagoEmpleado response = service.consultarPagoEmpleado(request);
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
 		} catch(Exception e) {
 			e.printStackTrace();

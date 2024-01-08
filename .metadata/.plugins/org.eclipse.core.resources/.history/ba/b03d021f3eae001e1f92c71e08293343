@@ -1,0 +1,5 @@
+package com.prueba.test.response;
+
+public class ResponsePagoEmpleado {
+
+}

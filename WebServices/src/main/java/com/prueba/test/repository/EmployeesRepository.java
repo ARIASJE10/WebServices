@@ -19,4 +19,7 @@ public interface EmployeesRepository extends JpaRepository<Employees, Long> {
 	
 	@Query(nativeQuery = true, value = "SELECT * FROM EMPLOYEES E WHERE E.JOB_ID = :id ")		
 	List<Employees> findByJobId(long id);
+	
+	@Query(nativeQuery = true, value = "SELECT E.JOB_ID FROM EMPLOYEES E WHERE E.ID = :id ")		
+	int findJobIdBiEmployee_id(long id);
 }

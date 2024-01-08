@@ -1,0 +1,5 @@
+package com.prueba.test.request;
+
+public class RequestPagoEmpleado {
+
+}

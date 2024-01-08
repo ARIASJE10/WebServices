@@ -16,5 +16,6 @@ public interface JobsRepository extends JpaRepository<Jobs, Long> {
 	@Query(nativeQuery = true, value = "SELECT * FROM JOBS J WHERE J.ID = :id")		
 	List<Jobs> findByJob(long id);
 	
-	
+	@Query(nativeQuery = true, value = "SELECT SUM(J.SALARY) FROM JOBS J WHERE J.ID = :id ")		
+	int pagoEmpleado(int id);
 }

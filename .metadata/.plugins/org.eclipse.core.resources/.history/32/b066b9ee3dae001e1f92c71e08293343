@@ -1,0 +1,13 @@
+package com.prueba.test.request;
+
+import java.util.Date;
+
+public class RequestPagoEmpleado {
+
+	private int employee_id;
+	private Date start_date;
+	private Date end_date;
+	
+	
+	
+}

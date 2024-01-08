@@ -21,10 +21,12 @@ import com.prueba.test.repository.JobsRepository;
 import com.prueba.test.repository.EmployeeWorkedHoursRepository;
 import com.prueba.test.request.RequestConsultaTotalHoras;
 import com.prueba.test.request.RequestEmployeeByJob;
+import com.prueba.test.request.RequestPagoEmpleado;
 import com.prueba.test.response.ResponseConsultaTotalHoras;
 import com.prueba.test.response.ResponseEmployee;
 import com.prueba.test.response.ResponseEmployeeByJob;
 import com.prueba.test.response.ResponseEmployeeWorkedHours;
+import com.prueba.test.response.ResponsePagoEmpleado;
 import com.prueba.test.service.TestService;
 
 @Service
@@ -150,6 +152,32 @@ public ResponseConsultaTotalHoras consultarTotalHorasTrabajadas(RequestConsultaT
 			}
 		}catch(Exception e){
 			response.setTotal_worked_hours("null");
+			response.setSuccess("false");
+		}
+		
+		return response;
+	}
+
+public ResponsePagoEmpleado consultarPagoEmpleado(RequestPagoEmpleado request) throws Exception{
+	
+	ResponsePagoEmpleado response=new ResponsePagoEmpleado();
+		
+		try {
+			List <Employees> employee_id = employeesRepository.findById(request.getEmployee_id());					
+			int obtenerJob_id = employeesRepository.findJobIdBiEmployee_id(request.getEmployee_id());
+			
+			if(!employee_id.isEmpty() && !employee_id.equals(null) && request.getStart_date().getTime()<request.getEnd_date().getTime()) {
+				
+				 int pagoEmpleado = jobsRepository.pagoEmpleado(obtenerJob_id);
+				
+				response.setPayment(String.valueOf(pagoEmpleado));
+				response.setSuccess("true");	
+			} else {
+				response.setPayment("null");
+				response.setSuccess("false");
+			}
+		}catch(Exception e){
+			response.setPayment("null");
 			response.setSuccess("false");
 		}
 		
